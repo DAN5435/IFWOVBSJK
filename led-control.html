@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Control Panel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: #1e1e1e;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #b0b0b0;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .led-section {
+            margin: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .led-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+        }
+        
+        .led {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: #222;
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.8),
+                0 0 10px rgba(0, 0, 0, 0.5);
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .led.on {
+            background-color: #00ff00;
+            box-shadow: 
+                inset 0 0 30px #00ff00,
+                0 0 40px #00ff00,
+                0 0 60px #00ff00;
+        }
+        
+        .led-reflection {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            top: 30px;
+            left: 40px;
+            transform: rotate(45deg);
+        }
+        
+        .led-status {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background-color: #2a2a2a;
+            display: inline-block;
+        }
+        
+        .led-status.on {
+            color: #00ff00;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+        
+        .led-status.off {
+            color: #ff4444;
+            background-color: rgba(255, 68, 68, 0.1);
+        }
+        
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            min-width: 160px;
+        }
+        
+        .btn-on {
+            background-color: #00c853;
+            color: white;
+        }
+        
+        .btn-on:hover {
+            background-color: #00e676;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 200, 83, 0.4);
+        }
+        
+        .btn-off {
+            background-color: #ff4444;
+            color: white;
+        }
+        
+        .btn-off:hover {
+            background-color: #ff6b6b;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        }
+        
+        .btn-toggle {
+            background-color: #4fc3f7;
+            color: white;
+        }
+        
+        .btn-toggle:hover {
+            background-color: #29b6f6;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
+        }
+        
+        .instructions {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 40px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .code-note {
+            font-family: 'Courier New', monospace;
+            background-color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LED Control Panel</h1>
+        <p class="subtitle">Click the buttons to control the virtual LED light</p>
+        
+        <div class="led-section">
+            <div class="led-container">
+                <div class="led" id="led-light">
+                    <div class="led-reflection"></div>
+                </div>
+            </div>
+            
+            <div class="led-status off" id="led-status">LED: OFF</div>
+        </div>
+        
+        <div class="control-panel">
+            <button class="control-btn btn-on" id="btn-on">TURN ON</button>
+            <button class="control-btn btn-off" id="btn-off">TURN OFF</button>
+            <button class="control-btn btn-toggle" id="btn-toggle">TOGGLE</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>How This Works:</h3>
+            <ol>
+                <li>The HTML creates the structure (buttons, LED display, text)</li>
+                <li>CSS styles everything to look like a real control panel</li>
+                <li>JavaScript adds interactivity:
+                    <ul style="margin-top: 8px; margin-left: 20px;">
+                        <li>Clicking "TURN ON" lights up the LED</li>
+                        <li>Clicking "TURN OFF" turns off the LED</li>
+                        <li>Clicking "TOGGLE" switches between on/off states</li>
+                    </ul>
+                </li>
+            </ol>
+            <p>Try it! This is your first step into web development.</p>
+        </div>
+    </div>
+
+    <script>
+        // Get HTML elements
+        const ledLight = document.getElementById('led-light');
+        const ledStatus = document.getElementById('led-status');
+        const btnOn = document.getElementById('btn-on');
+        const btnOff = document.getElementById('btn-off');
+        const btnToggle = document.getElementById('btn-toggle');
+        
+        // Track LED state
+        let isLedOn = false;
+        
+        // Function to turn LED on
+        function turnOn() {
+            ledLight.classList.add('on');
+            ledStatus.textContent = 'LED: ON';
+            ledStatus.classList.remove('off');
+            ledStatus.classList.add('on');
+            isLedOn = true;
+            console.log('LED turned ON');
+        }
+        
+        // Function to turn LED off
+        function turnOff() {
+            ledLight.classList.remove('on');
+            ledStatus.textContent = 'LED: OFF';
+            ledStatus.classList.remove('on');
+            ledStatus.classList.add('off');
+            isLedOn = false;
+            console.log('LED turned OFF');
+        }
+        
+        // Function to toggle LED state
+        function toggleLed() {
+            if (isLedOn) {
+                turnOff();
+            } else {
+                turnOn();
+            }
+        }
+        
+        // Add event listeners to buttons
+        btnOn.addEventListener('click', turnOn);
+        btnOff.addEventListener('click', turnOff);
+        btnToggle.addEventListener('click', toggleLed);
+        
+        // Add keyboard controls
+        document.addEventListener('keydown', function(event) {
+            // '1' key to turn on
+            if (event.key === '1') {
+                turnOn();
+            }
+            // '0' key to turn off
+            else if (event.key === '0') {
+                turnOff();
+            }
+            // Spacebar to toggle
+            else if (event.key === ' ') {
+                toggleLed();
+                event.preventDefault(); // Prevent space from scrolling page
+            }
+        });
+        
+        // Initial console message
+        console.log('LED Control Panel ready! Press 1 (ON), 0 (OFF), or Space (TOGGLE) on your keyboard.');
+    </script>
+</body>
+</html>
